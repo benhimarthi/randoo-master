@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "455244734450",
+    "project_id": "randoo-service",
+    "storage_bucket": "randoo-service.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:455244734450:android:a99927d2c0f6460d9d556b",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkbIhWpq2zAVfUfa_xsm2MaN2_NKrjGU8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

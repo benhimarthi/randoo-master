@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"randoo-service","appId":"1:455244734450:android:a99927d2c0f6460d9d556b","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"randoo-service","configurations":{"android":"1:455244734450:android:a99927d2c0f6460d9d556b","web":"1:455244734450:web:efdeec20fa3dc1589d556b"}}}}}}

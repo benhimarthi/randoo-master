@@ -1,0 +1,60 @@
+
+import 'package:dartz/dartz.dart';
+import 'package:myapp/core/errors/exceptions.dart';
+import 'package:myapp/core/utils/typedef.dart';
+import 'package:myapp/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:myapp/features/auth/domain/entities/user.dart';
+import 'package:myapp/features/auth/domain/repositories/auth_repo.dart';
+
+import '../../../../core/errors/firebase_failure.dart';
+
+class AuthRepoImpl implements AuthRepo {
+  final AuthRemoteDataSource _remoteDataSource;
+
+  const AuthRepoImpl(this._remoteDataSource);
+
+  @override
+  ResultFuture<User> signIn(String email, String password) async {
+    try {
+      final user = await _remoteDataSource.signIn(email, password);
+      return Right(user);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultFuture<User> register(
+    String name,
+    String email,
+    String password,
+    String userType,
+  ) async {
+    try {
+      final user = await _remoteDataSource.register(name, email, password, userType);
+      return Right(user);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid forgotPassword(String email) async {
+    try {
+      await _remoteDataSource.forgotPassword(email);
+      return const Right(null);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultVoid signOut() async {
+    try {
+      await _remoteDataSource.signOut();
+      return const Right(null);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+}

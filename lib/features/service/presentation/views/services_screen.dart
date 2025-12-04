@@ -1,0 +1,94 @@
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myapp/core/theme/theme_provider.dart';
+import 'package:myapp/features/auth/presentation/providers/user_provider.dart';
+import 'package:myapp/features/service/presentation/bloc/service_bloc.dart';
+import 'package:myapp/features/service/presentation/views/create_service_screen.dart';
+import 'package:myapp/features/service/presentation/widgets/service_list_item.dart';
+import 'package:myapp/features/serviceMetadata/presentation/pages/service_metadata_page.dart';
+import 'package:provider/provider.dart';
+
+class ServicesScreen extends StatefulWidget {
+  const ServicesScreen({super.key});
+
+  static const routeName = '/services';
+
+  @override
+  State<ServicesScreen> createState() => _ServicesScreenState();
+}
+
+class _ServicesScreenState extends State<ServicesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ServiceBloc>().add(GetServicesEvent());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final user = Provider.of<UserProvider>(context).user;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Services'),
+        actions: [
+          if (user?.userType == 'Admin')
+            IconButton(
+              icon: const Icon(Icons.assessment),
+              onPressed: () {
+                Navigator.pushNamed(context, ServiceMetadataPage.routeName);
+              },
+              tooltip: 'Show Statistics',
+            ),
+          IconButton(
+            icon: Icon(themeProvider.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () => themeProvider.toggleTheme(),
+            tooltip: 'Toggle Theme',
+          ),
+          IconButton(
+            icon: const Icon(Icons.auto_mode),
+            onPressed: () => themeProvider.setSystemTheme(),
+            tooltip: 'Set System Theme',
+          ),
+        ],
+      ),
+      body: BlocConsumer<ServiceBloc, ServiceState>(
+        listener: (context, state) {
+          if (state is ServiceDeleted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Service deleted successfully')),
+            );
+            context.read<ServiceBloc>().add(GetServicesEvent());
+          } else if (state is ServiceError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is GettingServices) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ServicesLoaded) {
+            return ListView.builder(
+              itemCount: state.services.length,
+              itemBuilder: (context, index) {
+                final service = state.services[index];
+                return ServiceListItem(service: service);
+              },
+            );
+          } else if (state is ServiceError) {
+            return Center(child: Text(state.message));
+          }
+          return const Center(child: Text('No services found.'));
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, CreateServiceScreen.routeName);
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
