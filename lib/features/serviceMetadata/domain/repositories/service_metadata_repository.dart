@@ -5,5 +5,8 @@ abstract class ServiceMetadataRepository {
   ResultFuture<ServiceMetadata> getServiceMetadata(String serviceId);
   ResultFuture<List<ServiceMetadata>> getAllServiceMetadata();
   ResultVoid incrementServiceClicks(String serviceId);
-  ResultVoid updateServiceReview({required String serviceId, required int rating});
+  ResultVoid updateServiceReview({
+    required String serviceId,
+    required int rating,
+  });
 }

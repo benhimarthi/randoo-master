@@ -1,13 +1,10 @@
-
 import 'package:myapp/features/auth/data/models/user_model.dart';
+import 'package:myapp/features/auth/domain/usecases/update_user.dart';
 
 abstract class AuthRemoteDataSource {
   const AuthRemoteDataSource();
 
-  Future<UserModel> signIn(
-    String email,
-    String password,
-  );
+  Future<UserModel> signIn(String email, String password);
 
   Future<UserModel> register(
     String name,
@@ -17,6 +14,10 @@ abstract class AuthRemoteDataSource {
   );
 
   Future<void> forgotPassword(String email);
+
+  Future<UserModel> updateUser(UpdateUserParams params);
+
+  Future<void> deleteUser(String id);
 
   Future<void> signOut();
 }

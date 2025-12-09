@@ -32,11 +32,15 @@ class ServiceMetadataRepositoryImpl implements ServiceMetadataRepository {
   }
 
   @override
-  ResultFuture<void> updateServiceReview(
-      {required String serviceId, required int rating}) async {
+  ResultFuture<void> updateServiceReview({
+    required String serviceId,
+    required int rating,
+  }) async {
     try {
       final result = await remoteDataSource.updateServiceReview(
-          serviceId: serviceId, rating: rating);
+        serviceId: serviceId,
+        rating: rating,
+      );
       return Right(result);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));

@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myapp/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:myapp/features/auth/presentation/providers/user_provider.dart';
-import 'package:myapp/features/auth/presentation/views/register_regular_user_screen.dart';
-import 'package:myapp/features/home/presentation/views/home_screen.dart';
-import 'package:myapp/features/service/presentation/views/services_screen.dart';
-import 'package:provider/provider.dart';
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+class RegisterRegularUserScreen extends StatefulWidget {
+  const RegisterRegularUserScreen({super.key});
 
-  static const routeName = '/sign-in';
+  static const routeName = '/register-regular-user';
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  State<RegisterRegularUserScreen> createState() => _RegisterRegularUserScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _RegisterRegularUserScreenState extends State<RegisterRegularUserScreen> {
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -37,13 +34,9 @@ class _SignInScreenState extends State<SignInScreen> {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(content: Text(state.message)));
-          } else if (state is SignedIn) {
-            context.read<UserProvider>().setUser(state.user);
-            if (state.user.userType == 'Admin') {
-              Navigator.pushReplacementNamed(context, ServicesScreen.routeName);
-            } else {
-              Navigator.pushReplacementNamed(context, HomeScreen.routeName);
-            }
+          } else if (state is Registered) {
+            // Navigate to home screen or a confirmation screen
+            Navigator.pop(context); // Go back to the previous screen for now
           }
         },
         builder: (context, state) {
@@ -57,13 +50,27 @@ class _SignInScreenState extends State<SignInScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Sign In',
+                        'Register as a Regular User',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 30),
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
                       TextFormField(
                         controller: emailController,
                         decoration: const InputDecoration(
@@ -97,26 +104,25 @@ class _SignInScreenState extends State<SignInScreen> {
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(
-                              SignInEvent(
+                              RegisterEvent(
+                                name: nameController.text.trim(),
                                 email: emailController.text.trim(),
                                 password: passwordController.text.trim(),
+                                userType: 'Regular user',
                               ),
                             );
                           }
                         },
                         child: state is AuthLoading
                             ? const CircularProgressIndicator()
-                            : const Text('Sign In'),
+                            : const Text('Register'),
                       ),
                       const SizedBox(height: 20),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            RegisterRegularUserScreen.routeName,
-                          );
+                          Navigator.pop(context);
                         },
-                        child: const Text('Don\'t have an account? Register'),
+                        child: const Text('Already have an account? Sign In'),
                       ),
                     ],
                   ),

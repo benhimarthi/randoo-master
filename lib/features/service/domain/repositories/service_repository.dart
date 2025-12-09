@@ -1,4 +1,3 @@
-
 import 'package:myapp/core/utils/typedef.dart';
 import 'package:myapp/features/service/domain/entities/review.dart';
 import 'package:myapp/features/service/domain/entities/service.dart';
@@ -10,4 +9,5 @@ abstract class ServiceRepository {
   ResultFuture<void> deleteService(String serviceId);
   ResultFuture<void> addReview(Review review);
   ResultFuture<List<Review>> getReviews(String serviceId);
+  ResultFuture<List<Service>> getReviewedServices(String userId);
 }

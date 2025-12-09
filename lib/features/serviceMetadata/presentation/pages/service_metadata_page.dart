@@ -5,7 +5,6 @@ import 'package:myapp/features/serviceMetadata/presentation/bloc/service_metadat
 import 'package:myapp/features/serviceMetadata/presentation/widgets/service_metadata_display.dart';
 
 class ServiceMetadataPage extends StatelessWidget {
-
   const ServiceMetadataPage({super.key});
 
   static const routeName = '/service-metadata';
@@ -13,11 +12,10 @@ class ServiceMetadataPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Service Statistics'),
-      ),
+      appBar: AppBar(title: const Text('Service Statistics')),
       body: BlocProvider(
-        create: (_) => sl<ServiceMetadataBloc>()..add(const GetAllServiceMetadataEvent()),
+        create: (_) =>
+            sl<ServiceMetadataBloc>()..add(const GetAllServiceMetadataEvent()),
         child: const ServiceMetadataDisplay(),
       ),
     );

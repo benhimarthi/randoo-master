@@ -22,20 +22,20 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
         statusCode: 500,
       );
     } catch (e) {
-      throw FirebaseExceptions(
-        message: e.toString(),
-        statusCode: 500,
-      );
+      throw FirebaseExceptions(message: e.toString(), statusCode: 500);
     }
   }
 
   @override
-  Stream<List<ServiceModel>> getServices() {
-    return _firestore.collection('services').snapshots().map((snapshot) {
-      return snapshot.docs
+  Future<List<ServiceModel>> getServices() async {
+    try {
+      var services = await _firestore.collection('services').get();
+      return services.docs
           .map((doc) => ServiceModel.fromMap(doc.data()))
           .toList();
-    });
+    } on FirebaseExceptions catch (e) {
+      throw FirebaseExceptions(message: e.message, statusCode: 500);
+    }
   }
 
   @override
@@ -51,10 +51,7 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
         statusCode: 500,
       );
     } catch (e) {
-      throw FirebaseExceptions(
-        message: e.toString(),
-        statusCode: 500,
-      );
+      throw FirebaseExceptions(message: e.toString(), statusCode: 500);
     }
   }
 
@@ -68,10 +65,7 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
         statusCode: 500,
       );
     } catch (e) {
-      throw FirebaseExceptions(
-        message: e.toString(),
-        statusCode: 500,
-      );
+      throw FirebaseExceptions(message: e.toString(), statusCode: 500);
     }
   }
 
@@ -89,10 +83,7 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
         statusCode: 500,
       );
     } catch (e) {
-      throw FirebaseExceptions(
-        message: e.toString(),
-        statusCode: 500,
-      );
+      throw FirebaseExceptions(message: e.toString(), statusCode: 500);
     }
   }
 
@@ -104,20 +95,9 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
         .collection('reviews')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => ReviewModel.fromMap(doc.data())).toList();
-    });
-  }
-
-  @override
-  Stream<List<ServiceModel>> getPremiumServices() {
-    return _firestore
-        .collection('services')
-        .where('subVersion', isEqualTo: 'Premium')
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => ServiceModel.fromMap(doc.data()))
-          .toList();
-    });
+          return snapshot.docs
+              .map((doc) => ReviewModel.fromMap(doc.data()))
+              .toList();
+        });
   }
 }

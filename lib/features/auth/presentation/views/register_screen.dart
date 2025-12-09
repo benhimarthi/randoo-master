@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myapp/features/auth/presentation/bloc/auth_bloc.dart';
@@ -36,11 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           if (state is AuthError) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                ),
-              );
+              ..showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is Registered) {
             // Navigate to home screen
           }
@@ -135,13 +130,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(
-                                  RegisterEvent(
-                                    name: nameController.text.trim(),
-                                    email: emailController.text.trim(),
-                                    password: passwordController.text.trim(),
-                                    userType: _selectedUserType,
-                                  ),
-                                );
+                              RegisterEvent(
+                                name: nameController.text.trim(),
+                                email: emailController.text.trim(),
+                                password: passwordController.text.trim(),
+                                userType: _selectedUserType,
+                              ),
+                            );
                           }
                         },
                         child: state is AuthLoading

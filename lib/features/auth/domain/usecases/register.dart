@@ -1,4 +1,3 @@
-
 import 'package:myapp/core/usecases/usecase.dart';
 import 'package:myapp/core/utils/typedef.dart';
 import 'package:myapp/features/auth/domain/entities/user.dart';
@@ -11,11 +10,11 @@ class Register extends UseCaseWithParam<User, RegisterParams> {
 
   @override
   ResultFuture<User> call(RegisterParams params) async => _repo.register(
-        params.name,
-        params.email,
-        params.password,
-        params.userType,
-      );
+    params.name,
+    params.email,
+    params.password,
+    params.userType,
+  );
 }
 
 class RegisterParams {

@@ -27,7 +27,7 @@ class ServiceModel extends Service {
       id: map['id'] as String,
       name: map['name'] as String,
       description: map['description'] as String,
-      category: ServiceCategory.values.firstWhere((e) => e.label == map['category']),
+      category: ServiceCategory.fromString(map['category'] as String),
       town: Town.values.firstWhere((e) => e.label == map['town']),
       address: map['address'] as String,
       phoneNumber: map['phoneNumber'] as String,
@@ -37,7 +37,28 @@ class ServiceModel extends Service {
       averageRating: (map['averageRating'] as num).toDouble(),
       createdAt: DateTime.parse(map['createdAt'] as String),
       status: map['status'] as bool,
-      subVersion: SubscriptionVersion.values.firstWhere((e) => e.label == map['subVersion']),
+      subVersion: SubscriptionVersion.values.firstWhere(
+        (e) => e.label == map['subVersion'],
+      ),
+    );
+  }
+
+  factory ServiceModel.fromEntity(Service entity) {
+    return ServiceModel(
+      id: entity.id,
+      name: entity.name,
+      description: entity.description,
+      category: entity.category,
+      town: entity.town,
+      address: entity.address,
+      phoneNumber: entity.phoneNumber,
+      email: entity.email,
+      ownerId: entity.ownerId,
+      imageUrls: entity.imageUrls,
+      averageRating: entity.averageRating,
+      createdAt: entity.createdAt,
+      status: entity.status,
+      subVersion: entity.subVersion,
     );
   }
 

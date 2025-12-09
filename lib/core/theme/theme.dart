@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const Color primarySeedColor = Colors.deepPurple;
+const Color primarySeedColor = Color.fromARGB(255, 255, 115, 0);
 
 final TextTheme appTextTheme = TextTheme(
   displayLarge: GoogleFonts.oswald(fontSize: 57, fontWeight: FontWeight.bold),

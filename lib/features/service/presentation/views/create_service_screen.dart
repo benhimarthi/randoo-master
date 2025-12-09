@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +5,7 @@ import 'package:myapp/features/service/domain/entities/category.dart';
 import 'package:myapp/features/service/domain/entities/service.dart';
 import 'package:myapp/features/service/domain/entities/subscription_version.dart';
 import 'package:myapp/features/service/domain/entities/town.dart';
-import 'package:myapp/features/service/presentation/bloc/service_bloc.dart';
+import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateServiceScreen extends StatefulWidget {
@@ -45,19 +44,13 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Service'),
-      ),
-      body: BlocConsumer<ServiceBloc, ServiceState>(
+      appBar: AppBar(title: const Text('Create Service')),
+      body: BlocConsumer<ServiceCubit, ServiceState>(
         listener: (context, state) {
           if (state is ServiceError) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                ),
-              );
+              ..showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is ServiceCreated) {
             Navigator.pop(context);
           }
@@ -110,17 +103,18 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                     ),
                     const SizedBox(height: 20),
                     DropdownButtonFormField<ServiceCategory>(
-                      value: _selectedCategory,
                       hint: const Text('Select a category'),
                       decoration: const InputDecoration(
                         labelText: 'Category',
                         border: OutlineInputBorder(),
                       ),
                       items: ServiceCategory.values
-                          .map((category) => DropdownMenuItem(
-                                value: category,
-                                child: Text(category.label),
-                              ))
+                          .map(
+                            (category) => DropdownMenuItem(
+                              value: category,
+                              child: Text(category.label),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         setState(() {
@@ -136,17 +130,18 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                     ),
                     const SizedBox(height: 20),
                     DropdownButtonFormField<Town>(
-                      value: _selectedTown,
                       hint: const Text('Select a town'),
                       decoration: const InputDecoration(
                         labelText: 'Town',
                         border: OutlineInputBorder(),
                       ),
                       items: Town.values
-                          .map((town) => DropdownMenuItem(
-                                value: town,
-                                child: Text(town.label),
-                              ))
+                          .map(
+                            (town) => DropdownMenuItem(
+                              value: town,
+                              child: Text(town.label),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         setState(() {
@@ -160,19 +155,20 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                         return null;
                       },
                     ),
-                     const SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     DropdownButtonFormField<SubscriptionVersion>(
-                      value: _selectedSubscription,
                       hint: const Text('Select a Subscription'),
                       decoration: const InputDecoration(
                         labelText: 'Subscription',
                         border: OutlineInputBorder(),
                       ),
                       items: SubscriptionVersion.values
-                          .map((sub) => DropdownMenuItem(
-                                value: sub,
-                                child: Text(sub.label),
-                              ))
+                          .map(
+                            (sub) => DropdownMenuItem(
+                              value: sub,
+                              child: Text(sub.label),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) {
                         setState(() {
@@ -248,14 +244,19 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                    'You must be logged in to create a service.'),
+                                  'You must be logged in to create a service.',
+                                ),
                               ),
                             );
                             return;
                           }
-                          final imageUrls = imageUrlsController.text.trim().isEmpty
-                              ? <String>[]
-                              : imageUrlsController.text.split(',').map((e) => e.trim()).toList();
+                          final imageUrls =
+                              imageUrlsController.text.trim().isEmpty
+                                  ? <String>[]
+                                  : imageUrlsController.text
+                                      .split(',')
+                                      .map((e) => e.trim())
+                                      .toList();
                           final service = Service(
                             id: const Uuid().v4(),
                             name: nameController.text.trim(),
@@ -272,9 +273,7 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                             status: _status,
                             subVersion: _selectedSubscription!,
                           );
-                          context
-                              .read<ServiceBloc>()
-                              .add(CreateServiceEvent(service));
+                          context.read<ServiceCubit>().createService(service);
                         }
                       },
                       child: state is CreatingService

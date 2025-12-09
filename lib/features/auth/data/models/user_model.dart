@@ -1,4 +1,3 @@
-
 import 'package:myapp/core/utils/typedef.dart';
 import 'package:myapp/features/auth/domain/entities/user.dart';
 
@@ -42,11 +41,11 @@ class UserModel extends User {
   }
 
   DataMap toMap() => {
-        'id': id,
-        'name': name,
-        'email': email,
-        'profilePic': profilePic,
-        'userType': userType,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'email': email,
+    'profilePic': profilePic,
+    'userType': userType,
+    'createdAt': createdAt.toIso8601String(),
+  };
 }

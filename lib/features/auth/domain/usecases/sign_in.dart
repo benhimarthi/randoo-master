@@ -1,4 +1,3 @@
-
 import 'package:myapp/core/usecases/usecase.dart';
 import 'package:myapp/core/utils/typedef.dart';
 import 'package:myapp/features/auth/domain/entities/user.dart';
@@ -10,18 +9,13 @@ class SignIn extends UseCaseWithParam<User, SignInParams> {
   const SignIn(this._repo);
 
   @override
-  ResultFuture<User> call(SignInParams params) async => _repo.signIn(
-        params.email,
-        params.password,
-      );
+  ResultFuture<User> call(SignInParams params) async =>
+      _repo.signIn(params.email, params.password);
 }
 
 class SignInParams {
   final String email;
   final String password;
 
-  const SignInParams({
-    required this.email,
-    required this.password,
-  });
+  const SignInParams({required this.email, required this.password});
 }

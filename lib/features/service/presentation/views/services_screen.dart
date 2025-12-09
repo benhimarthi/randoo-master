@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myapp/core/theme/theme_provider.dart';
 import 'package:myapp/features/auth/presentation/providers/user_provider.dart';
-import 'package:myapp/features/service/presentation/bloc/service_bloc.dart';
+import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
 import 'package:myapp/features/service/presentation/views/create_service_screen.dart';
 import 'package:myapp/features/service/presentation/widgets/service_list_item.dart';
 import 'package:myapp/features/serviceMetadata/presentation/pages/service_metadata_page.dart';
@@ -22,7 +21,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ServiceBloc>().add(GetServicesEvent());
+    context.read<ServiceCubit>().getServices();
   }
 
   @override
@@ -42,7 +41,11 @@ class _ServicesScreenState extends State<ServicesScreen> {
               tooltip: 'Show Statistics',
             ),
           IconButton(
-            icon: Icon(themeProvider.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
+            icon: Icon(
+              themeProvider.themeMode == ThemeMode.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
             onPressed: () => themeProvider.toggleTheme(),
             tooltip: 'Toggle Theme',
           ),
@@ -53,17 +56,17 @@ class _ServicesScreenState extends State<ServicesScreen> {
           ),
         ],
       ),
-      body: BlocConsumer<ServiceBloc, ServiceState>(
+      body: BlocConsumer<ServiceCubit, ServiceState>(
         listener: (context, state) {
           if (state is ServiceDeleted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Service deleted successfully')),
             );
-            context.read<ServiceBloc>().add(GetServicesEvent());
+            context.read<ServiceCubit>().getServices();
           } else if (state is ServiceError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {

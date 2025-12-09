@@ -1,4 +1,4 @@
-part of 'service_bloc.dart';
+part of 'service_cubit.dart';
 
 abstract class ServiceState extends Equatable {
   const ServiceState();
@@ -11,17 +11,9 @@ class ServiceInitial extends ServiceState {}
 
 class CreatingService extends ServiceState {}
 
-class GettingServices extends ServiceState {}
-
-class UpdatingService extends ServiceState {}
-
-class DeletingService extends ServiceState {}
-
-class AddingReview extends ServiceState {}
-
-class GettingReviews extends ServiceState {}
-
 class ServiceCreated extends ServiceState {}
+
+class GettingServices extends ServiceState {}
 
 class ServicesLoaded extends ServiceState {
   final List<Service> services;
@@ -32,11 +24,13 @@ class ServicesLoaded extends ServiceState {
   List<Object> get props => [services];
 }
 
+class UpdatingService extends ServiceState {}
+
 class ServiceUpdated extends ServiceState {}
 
-class ServiceDeleted extends ServiceState {}
+class DeletingService extends ServiceState {}
 
-class ReviewAdded extends ServiceState {}
+class ServiceDeleted extends ServiceState {}
 
 class ReviewsLoaded extends ServiceState {
   final List<Review> reviews;
@@ -45,6 +39,15 @@ class ReviewsLoaded extends ServiceState {
 
   @override
   List<Object> get props => [reviews];
+}
+
+class ReviewedServicesLoaded extends ServiceState {
+  final List<Service> services;
+
+  const ReviewedServicesLoaded(this.services);
+
+  @override
+  List<Object> get props => [services];
 }
 
 class ServiceError extends ServiceState {

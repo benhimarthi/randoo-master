@@ -13,7 +13,8 @@ class ServiceMetadata extends Equatable {
   final int reviewsCount;
   final int totalRating;
 
-  double get averageRating => reviewsCount > 0 ? totalRating / reviewsCount : 0.0;
+  double get averageRating =>
+      reviewsCount > 0 ? totalRating / reviewsCount : 0.0;
 
   @override
   List<Object?> get props => [serviceId, clicks, reviewsCount, totalRating];

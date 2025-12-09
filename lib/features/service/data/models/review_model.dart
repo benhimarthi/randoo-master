@@ -1,4 +1,3 @@
-
 import 'package:myapp/core/utils/typedef.dart';
 import 'package:myapp/features/service/domain/entities/review.dart';
 
@@ -7,8 +6,8 @@ class ReviewModel extends Review {
     required super.id,
     required super.serviceId,
     required super.userId,
-    required super.comment,
     required super.rating,
+    required super.comment,
     required super.createdAt,
   });
 
@@ -17,9 +16,20 @@ class ReviewModel extends Review {
       id: map['id'] as String,
       serviceId: map['serviceId'] as String,
       userId: map['userId'] as String,
-      comment: map['comment'] as String,
       rating: (map['rating'] as num).toDouble(),
+      comment: map['comment'] as String,
       createdAt: DateTime.parse(map['createdAt'] as String),
+    );
+  }
+
+  factory ReviewModel.fromEntity(Review entity) {
+    return ReviewModel(
+      id: entity.id,
+      serviceId: entity.serviceId,
+      userId: entity.userId,
+      rating: entity.rating,
+      comment: entity.comment,
+      createdAt: entity.createdAt,
     );
   }
 
@@ -28,8 +38,8 @@ class ReviewModel extends Review {
       'id': id,
       'serviceId': serviceId,
       'userId': userId,
-      'comment': comment,
       'rating': rating,
+      'comment': comment,
       'createdAt': createdAt.toIso8601String(),
     };
   }

@@ -1,4 +1,3 @@
-
 part of 'auth_bloc.dart';
 
 abstract class AuthState extends Equatable {
@@ -36,6 +35,14 @@ class Registered extends AuthState {
 
 class ForgotPasswordSent extends AuthState {
   const ForgotPasswordSent();
+}
+
+class UserDeleted extends AuthState {
+  const UserDeleted();
+}
+
+class SignedOut extends AuthState {
+  const SignedOut();
 }
 
 class AuthError extends AuthState {

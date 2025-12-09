@@ -1,12 +1,12 @@
-
 import 'package:dartz/dartz.dart';
-import 'package:myapp/core/errors/exceptions.dart';
 import 'package:myapp/core/utils/typedef.dart';
 import 'package:myapp/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:myapp/features/auth/domain/entities/user.dart';
 import 'package:myapp/features/auth/domain/repositories/auth_repo.dart';
 
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/firebase_failure.dart';
+import '../../domain/usecases/update_user.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final AuthRemoteDataSource _remoteDataSource;
@@ -31,7 +31,12 @@ class AuthRepoImpl implements AuthRepo {
     String userType,
   ) async {
     try {
-      final user = await _remoteDataSource.register(name, email, password, userType);
+      final user = await _remoteDataSource.register(
+        name,
+        email,
+        password,
+        userType,
+      );
       return Right(user);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));
@@ -49,10 +54,30 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
+  ResultVoid deleteUser(String id) async {
+    try {
+      await _remoteDataSource.deleteUser(id);
+      return const Right(null);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+
+  @override
   ResultVoid signOut() async {
     try {
       await _remoteDataSource.signOut();
       return const Right(null);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultFuture<User> updateUser(UpdateUserParams params) async {
+    try {
+      final user = await _remoteDataSource.updateUser(params);
+      return Right(user);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));
     }

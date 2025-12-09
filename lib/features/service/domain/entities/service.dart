@@ -76,7 +76,9 @@ class Service extends Equatable {
       id: snap.id,
       name: snap['name'],
       description: snap['description'],
-      category: ServiceCategory.values.firstWhere((e) => e.name == snap['category']),
+      category: ServiceCategory.values.firstWhere(
+        (e) => e.name == snap['category'],
+      ),
       town: Town.values.firstWhere((e) => e.name == snap['town']),
       address: snap['address'],
       phoneNumber: snap['phoneNumber'],
@@ -86,7 +88,9 @@ class Service extends Equatable {
       averageRating: (snap['averageRating'] as num).toDouble(),
       createdAt: (snap['createdAt'] as Timestamp).toDate(),
       status: snap['status'],
-      subVersion: SubscriptionVersion.values.firstWhere((e) => e.name == snap['subVersion']),
+      subVersion: SubscriptionVersion.values.firstWhere(
+        (e) => e.name == snap['subVersion'],
+      ),
     );
   }
 
@@ -110,19 +114,19 @@ class Service extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        category,
-        town,
-        address,
-        phoneNumber,
-        email,
-        ownerId,
-        imageUrls,
-        averageRating,
-        createdAt,
-        status,
-        subVersion,
-      ];
+    id,
+    name,
+    description,
+    category,
+    town,
+    address,
+    phoneNumber,
+    email,
+    ownerId,
+    imageUrls,
+    averageRating,
+    createdAt,
+    status,
+    subVersion,
+  ];
 }
