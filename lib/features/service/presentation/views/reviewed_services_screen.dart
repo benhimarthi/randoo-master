@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myapp/features/auth/presentation/providers/user_provider.dart';
+import 'package:myapp/features/home/presentation/views/home_screen.dart';
 import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
 import 'package:myapp/features/service/presentation/widgets/service_list_item.dart';
 
@@ -26,7 +27,15 @@ class _ReviewedServicesScreenState extends State<ReviewedServicesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Services You've Reviewed")),
+      appBar: AppBar(
+        title: const Text("Services You've Reviewed"),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed(HomeScreen.routeName);
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+      ),
       body: BlocBuilder<ServiceCubit, ServiceState>(
         builder: (context, state) {
           if (state is GettingServices) {

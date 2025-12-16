@@ -1,11 +1,11 @@
 enum ServiceCategory {
-  driver('Chauffeur'),
+  driver('Driver'),
   restaurant('Restaurant'),
-  apartment('Appartement'),
-  barberShop('Barbier'),
-  touristicGuide('Guide Touristique'),
-  transport('Transport'),
-  all('Tous');
+  apartment('Apartment'),
+  barberShop('Barber shop'),
+  touristicGuide('Touristic guide'),
+  shop('Shop'),
+  other('Other');
 
   const ServiceCategory(this.label);
   final String label;
@@ -18,16 +18,16 @@ enum ServiceCategory {
         return ServiceCategory.restaurant;
       case 'Apartment':
         return ServiceCategory.apartment;
-      case 'BarberShop':
-      case 'Barber Shop':
+      case 'Barber shop':
         return ServiceCategory.barberShop;
-      case 'TouristicGuide':
-      case 'Touristic Guide':
+      case 'Touristic guide':
         return ServiceCategory.touristicGuide;
-      case 'Transport':
-        return ServiceCategory.transport;
+      case 'Shop':
+        return ServiceCategory.shop;
+      case 'Other':
+        return ServiceCategory.other;
       default:
-        return ServiceCategory.all; 
+        return ServiceCategory.other;
     }
   }
 }

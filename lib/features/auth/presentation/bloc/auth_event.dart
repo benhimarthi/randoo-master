@@ -72,3 +72,7 @@ class DeleteUserEvent extends AuthEvent {
 class SignOutEvent extends AuthEvent {
   const SignOutEvent();
 }
+
+class IsLoggedInEvent extends AuthEvent {
+  const IsLoggedInEvent();
+}

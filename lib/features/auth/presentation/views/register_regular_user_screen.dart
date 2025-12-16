@@ -8,7 +8,8 @@ class RegisterRegularUserScreen extends StatefulWidget {
   static const routeName = '/register-regular-user';
 
   @override
-  State<RegisterRegularUserScreen> createState() => _RegisterRegularUserScreenState();
+  State<RegisterRegularUserScreen> createState() =>
+      _RegisterRegularUserScreenState();
 }
 
 class _RegisterRegularUserScreenState extends State<RegisterRegularUserScreen> {
@@ -28,6 +29,15 @@ class _RegisterRegularUserScreenState extends State<RegisterRegularUserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Randoo',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
+        //centerTitle: true,
+        backgroundColor: Colors.transparent,
+        leading: SizedBox(),
+      ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
@@ -50,7 +60,7 @@ class _RegisterRegularUserScreenState extends State<RegisterRegularUserScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Register as a Regular User',
+                        'Register',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,

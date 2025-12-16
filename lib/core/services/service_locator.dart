@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:myapp/features/auth/domain/usecases/sign_out.dart';
 
@@ -13,6 +14,9 @@ import 'package:myapp/features/auth/domain/usecases/forgot_password.dart';
 import 'package:myapp/features/auth/domain/usecases/register.dart';
 import 'package:myapp/features/auth/domain/usecases/sign_in.dart';
 import 'package:myapp/features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/data/datasources/auth_local_data_source.dart';
+import '../../features/auth/domain/usecases/is_logged_in.dart';
+import '../../features/auth/domain/usecases/update_user.dart';
 
 // Service imports
 import 'package:myapp/features/service/data/datasources/service_remote_data_source.dart';
@@ -30,7 +34,6 @@ import 'package:myapp/features/service/domain/usecases/update_service.dart';
 import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
 import 'package:myapp/features/service/domain/usecases/get_reviewed_services.dart';
 
-
 // Service Metadata imports
 import 'package:myapp/features/serviceMetadata/data/datasources/service_metadata_remote_data_source.dart';
 import 'package:myapp/features/serviceMetadata/data/datasources/service_metadata_remote_data_source_impl.dart';
@@ -42,19 +45,33 @@ import 'package:myapp/features/serviceMetadata/domain/usecases/increment_service
 import 'package:myapp/features/serviceMetadata/domain/usecases/update_service_review.dart';
 import 'package:myapp/features/serviceMetadata/presentation/bloc/service_metadata_bloc.dart';
 
-import '../../features/auth/domain/usecases/update_user.dart';
+// Image imports
+import '../../features/imageService/data/repositories/imageRepositoryImpl.dart';
+import '../../features/imageService/domain/repositories/ImageRepository.dart';
+import '../../features/imageService/domain/usecases/uploadImageUsecase.dart';
+import '../../features/imageService/presentation/cubit/imageCubit.dart';
+import '../../features/service/domain/usecases/get_service_by_id.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // Blocs
   sl.registerFactory(
-    () => AuthBloc(signIn: sl(), register: sl(), forgotPassword: sl(), deleteUser: sl(), updateUser: sl(), signOut: sl()),
+    () => AuthBloc(
+      signIn: sl(),
+      register: sl(),
+      isLoggedIn: sl(),
+      forgotPassword: sl(),
+      deleteUser: sl(),
+      updateUser: sl(),
+      signOut: sl(),
+    ),
   );
   sl.registerFactory(
     () => ServiceCubit(
       createService: sl(),
       getServices: sl(),
+      getServiceById: sl(),
       updateService: sl(),
       deleteService: sl(),
       addReview: sl(),
@@ -70,19 +87,22 @@ Future<void> init() async {
       updateServiceReview: sl(),
     ),
   );
+  sl.registerFactory(() => Imagecubit(uploadImages: sl()));
 
   // Use cases
   // Auth
   sl.registerLazySingleton(() => SignIn(sl()));
   sl.registerLazySingleton(() => Register(sl()));
+  sl.registerLazySingleton(() => IsLoggedIn(sl()));
   sl.registerLazySingleton(() => ForgotPassword(sl()));
-  sl.registerLazySingleton(()=> DeleteUser(sl()));
+  sl.registerLazySingleton(() => DeleteUser(sl()));
   sl.registerLazySingleton(() => UpdateUser(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
 
   // Service
   sl.registerLazySingleton(() => CreateService(sl()));
   sl.registerLazySingleton(() => GetServices(sl()));
+  sl.registerLazySingleton(() => GetServiceById(sl()));
   sl.registerLazySingleton(() => UpdateService(sl()));
   sl.registerLazySingleton(() => DeleteService(sl()));
   sl.registerLazySingleton(() => AddReview(sl()));
@@ -95,14 +115,18 @@ Future<void> init() async {
   sl.registerLazySingleton(() => IncrementServiceClicks(sl()));
   sl.registerLazySingleton(() => UpdateServiceReview(sl()));
 
+  // Image Service
+  sl.registerLazySingleton(() => UploadImageUseCase(sl()));
+
   // Repositories
-  sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl(sl()));
+  sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl(sl(), sl()));
   sl.registerLazySingleton<ServiceRepository>(
     () => ServiceRepositoryImpl(sl(), sl()),
   );
   sl.registerLazySingleton<ServiceMetadataRepository>(
     () => ServiceMetadataRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<ImageRepository>(() => ImagerepositoryImpl(sl()));
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -117,8 +141,10 @@ Future<void> init() async {
   sl.registerLazySingleton<ServiceMetadataRemoteDataSource>(
     () => ServiceMetadataRemoteDataSourceImpl(sl()),
   );
+  sl.registerLazySingleton(() => AuthLocalDataSource());
 
   // External
   sl.registerLazySingleton(() => FirebaseAuth.instance);
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton(() => FirebaseStorage.instance);
 }

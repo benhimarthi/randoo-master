@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/core/errors/exceptions.dart';
 import 'package:myapp/features/service/data/datasources/service_remote_data_source.dart';
-import 'package:myapp/features/service/data/models/review_model.dart';
 import 'package:myapp/features/service/data/models/service_model.dart';
 
 class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
@@ -70,13 +69,10 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
   }
 
   @override
-  Future<void> addReview(ReviewModel review) async {
+  Future<ServiceModel> getServiceById(String serviceId) async {
     try {
-      await _firestore
-          .collection('services')
-          .doc(review.serviceId)
-          .collection('reviews')
-          .add(review.toMap());
+      final md = await _firestore.collection('services').doc(serviceId).get();
+      return ServiceModel.fromMap(md.data()!);
     } on FirebaseException catch (e) {
       throw FirebaseExceptions(
         message: e.message ?? 'An error occurred',
@@ -85,19 +81,5 @@ class ServiceRemoteDataSourceImpl implements ServiceRemoteDataSource {
     } catch (e) {
       throw FirebaseExceptions(message: e.toString(), statusCode: 500);
     }
-  }
-
-  @override
-  Stream<List<ReviewModel>> getReviews(String serviceId) {
-    return _firestore
-        .collection('services')
-        .doc(serviceId)
-        .collection('reviews')
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => ReviewModel.fromMap(doc.data()))
-              .toList();
-        });
   }
 }

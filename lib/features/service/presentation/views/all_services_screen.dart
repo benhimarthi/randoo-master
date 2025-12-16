@@ -4,6 +4,7 @@ import 'package:myapp/features/service/domain/entities/category.dart';
 import 'package:myapp/features/service/domain/entities/town.dart';
 import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
 import 'package:myapp/features/service/presentation/widgets/service_list_item.dart';
+import '../../domain/entities/service.dart';
 
 class AllServicesScreen extends StatefulWidget {
   const AllServicesScreen({
@@ -28,10 +29,16 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
   late Town? _selectedTown;
   late String _searchQuery;
   final TextEditingController _searchController = TextEditingController();
+  late List<Service> filteredServices;
+  late bool displayAllServices;
+  late List<Service> allServices;
 
   @override
   void initState() {
     super.initState();
+    filteredServices = [];
+    allServices = [];
+    displayAllServices = true;
     _selectedCategory = widget.initialCategory;
     _selectedTown = widget.initialTown;
     _searchQuery = widget.initialSearchQuery;
@@ -39,29 +46,55 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
     context.read<ServiceCubit>().getServices();
   }
 
+  void _filterServices(List<Service> services) {
+    filteredServices.where((x) => x.status).toList();
+    filteredServices = services.where((service) {
+      final matchesCategory = service.category == _selectedCategory;
+      final matchesTown =
+          _selectedTown == null || service.town == _selectedTown;
+      final matchesSearch = service.name.toLowerCase().contains(
+        _searchQuery.toLowerCase(),
+      );
+      if (displayAllServices) {
+        return matchesSearch && matchesTown;
+      } else {
+        return matchesCategory && matchesTown && matchesSearch;
+      }
+    }).toList();
+    filteredServices.sort((a, b) {
+      return a.createdAt.compareTo(b.createdAt);
+    });
+    filteredServices.sort((a, b) {
+      int rank(String v) {
+        if (v.toLowerCase() == 'premium') return 0;
+        return 1;
+      }
+
+      return rank(a.subVersion.label).compareTo(rank(b.subVersion.label));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('All Services'),
-      ),
+      appBar: AppBar(title: const Text('All Services')),
       body: Column(
         children: [
           // Search Bar
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(30),
-              boxShadow: [
+              /*boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withAlpha(51),
+                  color: Theme.of(context).colorScheme.shadow,
                   spreadRadius: 2,
                   blurRadius: 5,
                   offset: const Offset(0, 3),
                 ),
-              ],
+              ],*/
             ),
             child: TextField(
               controller: _searchController,
@@ -73,47 +106,68 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
               decoration: const InputDecoration(
                 hintText: 'Rechercher un service...',
                 icon: Icon(Icons.search),
-                border: InputBorder.none,
+                //border: InputBorder.none,
               ),
             ),
           ),
           // Category Chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 2.5,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: ServiceCategory.values.map((category) {
-                return _buildCategoryChip(
-                  context,
-                  category.label,
-                  _getIconForCategory(category),
-                  _selectedCategory == category,
-                  () {
-                    setState(() {
-                      _selectedCategory = category;
-                    });
-                  },
-                );
-              }).toList(),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: 65,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              child: Builder(
+                builder: (context) {
+                  final myElement = ServiceCategory.values.map((category) {
+                    return _buildCategoryChip(
+                      context,
+                      category.label,
+                      _getIconForCategory(category),
+                      _selectedCategory == category && !displayAllServices,
+                      () {
+                        setState(() {
+                          _selectedCategory = category;
+                          filteredServices = allServices;
+                          displayAllServices = false;
+                          _filterServices(filteredServices);
+                        });
+                      },
+                    );
+                  }).toList();
+                  myElement.add(
+                    _buildCategoryChip(
+                      context,
+                      'All',
+                      Icons.all_inclusive,
+                      displayAllServices,
+                      () {
+                        setState(() {
+                          displayAllServices = true;
+                          filteredServices = allServices;
+                          _filterServices(filteredServices);
+                        });
+                      },
+                    ),
+                  );
+                  return ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: myElement,
+                  );
+                },
+              ),
             ),
           ),
           // Town Dropdown
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<Town>(
@@ -137,7 +191,14 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
           ),
           // Service List
           Expanded(
-            child: BlocBuilder<ServiceCubit, ServiceState>(
+            child: BlocConsumer<ServiceCubit, ServiceState>(
+              listener: (context, state) {
+                if (state is ServicesLoaded) {
+                  allServices = state.services;
+                  filteredServices = state.services;
+                  _filterServices(state.services);
+                }
+              },
               builder: (context, state) {
                 if (state is GettingServices) {
                   return const Center(child: CircularProgressIndicator());
@@ -145,25 +206,7 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
                 if (state is ServiceError) {
                   return Center(child: Text(state.message));
                 }
-                if (state is ServicesLoaded) {
-                  final filteredServices = state.services.where((service) {
-                    final matchesCategory =
-                        _selectedCategory == ServiceCategory.all ||
-                            service.category == _selectedCategory;
-                    final matchesTown =
-                        _selectedTown == null || service.town == _selectedTown;
-                    final matchesSearch = service.name
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase());
-                    return matchesCategory && matchesTown && matchesSearch;
-                  }).toList();
-
-                  if (filteredServices.isEmpty) {
-                    return const Center(
-                      child: Text('Aucun service trouvé.'),
-                    );
-                  }
-
+                if (filteredServices.isNotEmpty) {
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: filteredServices.length,
@@ -177,7 +220,9 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
                     },
                   );
                 }
-                return const Center(child: Text('Aucun service à afficher pour le moment.'));
+                return const Center(
+                  child: Text('Aucun service à afficher pour le moment.'),
+                );
               },
             ),
           ),
@@ -193,30 +238,43 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
     bool isSelected,
     VoidCallback onTap,
   ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.deepOrange : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? Colors.deepOrange : Colors.grey.shade300,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.black,
-              size: 20,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(color: isSelected ? Colors.white : Colors.black),
-            ),
-          ],
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.onPrimary
+                    : Theme.of(context).colorScheme.onSurface,
+                size: 20,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -234,10 +292,10 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
         return Icons.cut;
       case ServiceCategory.touristicGuide:
         return Icons.map;
-      case ServiceCategory.transport:
-        return Icons.bus_alert;
-      case ServiceCategory.all:
-        return Icons.public;
+      case ServiceCategory.shop:
+        return Icons.shopping_cart;
+      case ServiceCategory.other:
+        return Icons.more_horiz;
     }
   }
 }

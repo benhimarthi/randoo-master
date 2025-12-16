@@ -41,10 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           PopupMenuButton(
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'signout',
-                child: Text('Sign Out'),
-              ),
+              const PopupMenuItem(value: 'signout', child: Text('Sign Out')),
               const PopupMenuItem(
                 value: 'delete',
                 child: Text('Delete Account'),
@@ -54,10 +51,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (value == 'delete') {
                 _showDeleteConfirmationDialog(context);
               } else if (value == 'signout') {
+                context.read<UserProvider>().setUser(null);
                 context.read<AuthBloc>().add(const SignOutEvent());
               }
             },
-          )
+          ),
         ],
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
@@ -72,10 +70,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SnackBar(content: Text('Profile updated successfully')),
             );
           } else if (state is UserDeleted || state is SignedOut) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              SignInScreen.routeName,
-              (route) => false,
-            );
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil(SignInScreen.routeName, (route) => false);
           }
         },
         builder: (context, state) {
@@ -109,13 +106,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           final user = context.read<UserProvider>().user;
                           if (user != null) {
                             context.read<AuthBloc>().add(
-                                  UpdateUserEvent(
-                                    id: user.id,
-                                    name: nameController.text,
-                                    email: user.email,
-                                    userType: user.userType,
-                                  ),
-                                );
+                              UpdateUserEvent(
+                                id: user.id,
+                                name: nameController.text,
+                                email: user.email,
+                                userType: user.userType,
+                              ),
+                            );
                           }
                         }
                       },
@@ -139,7 +136,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Account?'),
         content: const Text(
-            'Are you sure you want to delete your account? This action cannot be undone.'),
+          'Are you sure you want to delete your account? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

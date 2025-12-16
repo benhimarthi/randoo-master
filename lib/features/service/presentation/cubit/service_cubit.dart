@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:myapp/features/service/domain/entities/review.dart';
@@ -12,6 +11,8 @@ import 'package:myapp/features/service/domain/usecases/get_services.dart';
 import 'package:myapp/features/service/domain/usecases/update_service.dart';
 import 'package:myapp/features/service/domain/usecases/get_reviewed_services.dart';
 
+import '../../domain/usecases/get_service_by_id.dart';
+
 part 'service_state.dart';
 
 class ServiceCubit extends Cubit<ServiceState> {
@@ -21,6 +22,7 @@ class ServiceCubit extends Cubit<ServiceState> {
   final DeleteService _deleteService;
   final AddReview _addReview;
   final GetReviews _getReviews;
+  final GetServiceById _getServiceById;
   final GetReviewedServices _getReviewedServices;
 
   StreamSubscription? _servicesSubscription;
@@ -32,6 +34,7 @@ class ServiceCubit extends Cubit<ServiceState> {
     required DeleteService deleteService,
     required AddReview addReview,
     required GetReviews getReviews,
+    required GetServiceById getServiceById,
     required GetReviewedServices getReviewedServices,
   }) : _createService = createService,
        _getServices = getServices,
@@ -39,8 +42,13 @@ class ServiceCubit extends Cubit<ServiceState> {
        _deleteService = deleteService,
        _addReview = addReview,
        _getReviews = getReviews,
+       _getServiceById = getServiceById,
        _getReviewedServices = getReviewedServices,
        super(ServiceInitial());
+
+  Future<void> init() async {
+    emit(ServiceInitial());
+  }
 
   Future<void> createService(Service service) async {
     emit(CreatingService());
@@ -57,6 +65,15 @@ class ServiceCubit extends Cubit<ServiceState> {
     res.fold(
       (failure) => emit(ServiceError(failure.message)),
       (services) => emit(ServicesLoaded(services)),
+    );
+  }
+
+  Future<void> getServiceById(String serviceId) async {
+    emit(GettingServices());
+    final result = await _getServiceById(serviceId);
+    result.fold(
+      (failure) => emit(ServiceError(failure.message)),
+      (service) => emit(ServiceLoaded(service)),
     );
   }
 

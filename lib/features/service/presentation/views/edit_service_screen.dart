@@ -5,6 +5,11 @@ import 'package:myapp/features/service/domain/entities/service.dart';
 import 'package:myapp/features/service/domain/entities/subscription_version.dart';
 import 'package:myapp/features/service/domain/entities/town.dart';
 import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
+import 'package:myapp/features/service/presentation/views/services_screen.dart';
+
+import '../../../imageService/presentation/cubit/imageCubit.dart';
+import '../../../imageService/presentation/cubit/imageState.dart';
+import '../../../imageService/presentation/imageUploaderWidget.dart';
 
 class EditServiceScreen extends StatefulWidget {
   const EditServiceScreen({super.key, required this.service});
@@ -26,6 +31,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   late final TextEditingController _phoneNumberController;
   late final TextEditingController _emailController;
   final formKey = GlobalKey<FormState>();
+  late List<String> myImages;
 
   @override
   void initState() {
@@ -42,6 +48,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
       text: widget.service.phoneNumber,
     );
     _emailController = TextEditingController(text: widget.service.email);
+    myImages = widget.service.imageUrls;
   }
 
   @override
@@ -65,6 +72,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         address: _addressController.text,
         phoneNumber: _phoneNumberController.text,
         email: _emailController.text,
+        imageUrls: myImages,
       );
 
       context.read<ServiceCubit>().updateService(updatedService);
@@ -81,7 +89,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Service updated successfully')),
             );
-            Navigator.of(context).pop();
+            Navigator.of(context).pushNamed(ServicesScreen.routeName);
           } else if (state is ServiceError) {
             ScaffoldMessenger.of(
               context,
@@ -95,6 +103,19 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
               key: formKey,
               child: Column(
                 children: [
+                  BlocConsumer<Imagecubit, Imagestate>(
+                    listener: (context, state) {
+                      if (state is ImageLoaded) {
+                        setState(() {
+                          myImages.add(state.image);
+                        });
+                      }
+                    },
+                    builder: (context, state) {
+                      return ImageUploaderWidget(displayUploadBtn: true);
+                    },
+                  ),
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(

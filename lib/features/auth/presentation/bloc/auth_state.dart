@@ -24,6 +24,14 @@ class SignedIn extends AuthState {
   List<Object> get props => [user];
 }
 
+class Authenticated extends AuthState {
+  const Authenticated();
+}
+
+class Unauthenticated extends AuthState {
+  const Unauthenticated();
+}
+
 class Registered extends AuthState {
   final User user;
 

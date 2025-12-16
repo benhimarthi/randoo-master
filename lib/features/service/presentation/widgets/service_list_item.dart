@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:myapp/features/auth/presentation/providers/user_provider.dart';
+import 'package:myapp/features/imageService/presentation/image.carousel.dart';
 import 'package:myapp/features/service/domain/entities/service.dart';
 import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
 import 'package:myapp/features/service/presentation/views/edit_service_screen.dart';
 import 'package:myapp/features/service/presentation/views/service_details_screen.dart';
 import 'package:provider/provider.dart';
 
-class ServiceListItem extends StatelessWidget {
+class ServiceListItem extends StatefulWidget {
   const ServiceListItem({super.key, required this.service});
 
   final Service service;
+
+  @override
+  State<ServiceListItem> createState() => _ServiceListItemState();
+}
+
+class _ServiceListItemState extends State<ServiceListItem> {
+  @override
+  dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +29,17 @@ class ServiceListItem extends StatelessWidget {
         final bool isAdmin = userProvider.user?.userType == 'Admin';
         return GestureDetector(
           onTap: () {
-            Navigator.of(
-              context,
-            ).pushNamed(ServiceDetailsScreen.routeName, arguments: service);
+            context.read<ServiceCubit>().init();
+            Navigator.of(context).pushNamed(
+              ServiceDetailsScreen.routeName,
+              arguments: widget.service,
+            );
           },
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             elevation: 2,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -41,35 +55,64 @@ class ServiceListItem extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              service.name,
+                              widget.service.name,
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
+                            const SizedBox(height: 8),
+                            if (widget.service.subVersion.label.toLowerCase() ==
+                                'premium')
+                              ImageCarousel(
+                                height: 120,
+                                imageUrls: widget.service.imageUrls,
+                              ),
                             const SizedBox(height: 8),
                             Row(
                               children: [
                                 Icon(
                                   Icons.location_on,
-                                  color: Colors.grey.shade600,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                   size: 16,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  service.town.label,
-                                  style: TextStyle(color: Colors.grey.shade600),
+                                  widget.service.town.label,
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ],
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(
-                        width: 120,
+                      Container(
+                        width: 170,
+                        //color: Colors.green,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Chip(
-                              label: Text(service.category.label),
-                              backgroundColor: Colors.orange.shade100,
+                            Container(
+                              width: 120,
+
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.secondaryContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                widget.service.category.label,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             if (isAdmin)
                               PopupMenuButton<String>(
@@ -78,7 +121,7 @@ class ServiceListItem extends StatelessWidget {
                                     Navigator.pushNamed(
                                       context,
                                       EditServiceScreen.routeName,
-                                      arguments: service,
+                                      arguments: widget.service,
                                     );
                                   } else if (value == 'delete') {
                                     showDialog(
@@ -99,7 +142,9 @@ class ServiceListItem extends StatelessWidget {
                                             onPressed: () {
                                               context
                                                   .read<ServiceCubit>()
-                                                  .deleteService(service.id);
+                                                  .deleteService(
+                                                    widget.service.id,
+                                                  );
                                               Navigator.pop(context);
                                             },
                                             child: const Text('Delete'),
@@ -128,26 +173,37 @@ class ServiceListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    service.description,
+                    widget.service.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 12),
                   const Divider(),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(Icons.phone, color: Colors.orange, size: 16),
-                      const SizedBox(width: 8),
-                      Text(service.phoneNumber),
-                    ],
+                  GestureDetector(
+                    onTap: () {},
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.phone,
+                          color: Theme.of(context).colorScheme.secondary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(widget.service.phoneNumber),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.email, color: Colors.orange, size: 16),
+                      Icon(
+                        Icons.email,
+                        color: Theme.of(context).colorScheme.secondary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
-                      Text(service.email),
+                      Text(widget.service.email),
                     ],
                   ),
                 ],

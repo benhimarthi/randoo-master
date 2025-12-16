@@ -1,12 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myapp/features/service/data/models/service_model.dart';
 import 'package:myapp/features/service/domain/entities/category.dart';
 import 'package:myapp/features/service/domain/entities/service.dart';
 import 'package:myapp/features/service/domain/entities/subscription_version.dart';
 import 'package:myapp/features/service/domain/entities/town.dart';
 import 'package:myapp/features/service/presentation/cubit/service_cubit.dart';
+import 'package:myapp/features/service/presentation/views/services_screen.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../../../core/services/notification.service.dart';
+import '../../../imageService/presentation/cubit/imageCubit.dart';
+import '../../../imageService/presentation/cubit/imageState.dart';
+import '../../../imageService/presentation/imageUploaderWidget.dart';
 
 class CreateServiceScreen extends StatefulWidget {
   const CreateServiceScreen({super.key});
@@ -29,6 +36,17 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
   Town? _selectedTown;
   SubscriptionVersion? _selectedSubscription;
   bool _status = true;
+  late List<String> myImages;
+  late ServiceModel? serviceM;
+  late String serviceId;
+
+  @override
+  void initState() {
+    super.initState();
+    serviceM = null;
+    myImages = [];
+    serviceId = const Uuid().v4();
+  }
 
   @override
   void dispose() {
@@ -63,6 +81,36 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                 key: formKey,
                 child: Column(
                   children: [
+                    BlocConsumer<Imagecubit, Imagestate>(
+                      listener: (context, state) {
+                        if (state is ImageLoaded) {
+                          setState(() {
+                            myImages.add(state.image);
+                          });
+                        }
+                      },
+                      builder: (context, state) {
+                        return ImageUploaderWidget(displayUploadBtn: true);
+                      },
+                    ),
+                    BlocConsumer<ServiceCubit, ServiceState>(
+                      listener: (context, state) {
+                        if (state is ServiceCreated) {
+                          NotificationService.sendTopicNotification({
+                            'id': serviceId,
+                            'name': nameController.text,
+                            'description': descriptionController.text,
+                          });
+                          Navigator.of(
+                            context,
+                          ).pushNamed(ServicesScreen.routeName);
+                        }
+                      },
+                      builder: (context, state) {
+                        return Container();
+                      },
+                    ),
+                    const SizedBox(height: 20),
                     SwitchListTile(
                       title: const Text('Service Status'),
                       value: _status,
@@ -228,13 +276,7 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    TextFormField(
-                      controller: imageUrlsController,
-                      decoration: const InputDecoration(
-                        labelText: 'Image URLs (comma-separated)',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+
                     const SizedBox(height: 30),
                     ElevatedButton(
                       onPressed: () {
@@ -250,15 +292,9 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                             );
                             return;
                           }
-                          final imageUrls =
-                              imageUrlsController.text.trim().isEmpty
-                                  ? <String>[]
-                                  : imageUrlsController.text
-                                      .split(',')
-                                      .map((e) => e.trim())
-                                      .toList();
+
                           final service = Service(
-                            id: const Uuid().v4(),
+                            id: serviceId,
                             name: nameController.text.trim(),
                             description: descriptionController.text.trim(),
                             category: _selectedCategory!,
@@ -267,12 +303,13 @@ class _CreateServiceScreenState extends State<CreateServiceScreen> {
                             phoneNumber: phoneController.text.trim(),
                             email: emailController.text.trim(),
                             ownerId: user.uid,
-                            imageUrls: imageUrls,
+                            imageUrls: myImages,
                             averageRating: 0.0,
                             createdAt: DateTime.now(),
                             status: _status,
                             subVersion: _selectedSubscription!,
                           );
+                          serviceM = ServiceModel.fromEntity(service);
                           context.read<ServiceCubit>().createService(service);
                         }
                       },

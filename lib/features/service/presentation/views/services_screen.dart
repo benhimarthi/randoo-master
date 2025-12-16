@@ -8,6 +8,10 @@ import 'package:myapp/features/service/presentation/widgets/service_list_item.da
 import 'package:myapp/features/serviceMetadata/presentation/pages/service_metadata_page.dart';
 import 'package:provider/provider.dart';
 
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/views/sign_in_screen.dart';
+import '../../domain/entities/service.dart';
+
 class ServicesScreen extends StatefulWidget {
   const ServicesScreen({super.key});
 
@@ -18,9 +22,11 @@ class ServicesScreen extends StatefulWidget {
 }
 
 class _ServicesScreenState extends State<ServicesScreen> {
+  late List<Service> myServices;
   @override
   void initState() {
     super.initState();
+    myServices = [];
     context.read<ServiceCubit>().getServices();
   }
 
@@ -31,6 +37,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Services'),
+        leading: SizedBox(),
         actions: [
           if (user?.userType == 'Admin')
             IconButton(
@@ -56,6 +63,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
           ),
         ],
       ),
+
       body: BlocConsumer<ServiceCubit, ServiceState>(
         listener: (context, state) {
           if (state is ServiceDeleted) {
@@ -67,31 +75,65 @@ class _ServicesScreenState extends State<ServicesScreen> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is ServicesLoaded) {
+            myServices = state.services;
           }
         },
         builder: (context, state) {
           if (state is GettingServices) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is ServicesLoaded) {
+          } else if (state is ServiceError) {
+            return Center(child: Text(state.message));
+          } else if (myServices.isNotEmpty) {
             return ListView.builder(
-              itemCount: state.services.length,
+              itemCount: myServices.length,
               itemBuilder: (context, index) {
-                final service = state.services[index];
+                final service = myServices[index];
                 return ServiceListItem(service: service);
               },
             );
-          } else if (state is ServiceError) {
-            return Center(child: Text(state.message));
           }
           return const Center(child: Text('No services found.'));
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, CreateServiceScreen.routeName);
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: Container(
+        height: 150,
+        //color: Colors.green,
+        child: Column(
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, CreateServiceScreen.routeName);
+              },
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(height: 10),
+            BlocConsumer<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (state is UserDeleted || state is SignedOut) {
+                  context.read<UserProvider>().setUser(null);
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    SignInScreen.routeName,
+                    (route) => false,
+                  );
+                }
+              },
+              builder: (context, state) {
+                return IconButton(
+                  onPressed: () {
+                    context.read<AuthBloc>().add(const SignOutEvent());
+                  },
+                  icon: const Icon(Icons.logout),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+/**
+ * 
+ */

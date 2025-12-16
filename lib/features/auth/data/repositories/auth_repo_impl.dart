@@ -7,17 +7,31 @@ import 'package:myapp/features/auth/domain/repositories/auth_repo.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/firebase_failure.dart';
 import '../../domain/usecases/update_user.dart';
+import '../datasources/auth_local_data_source.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final AuthRemoteDataSource _remoteDataSource;
+  final AuthLocalDataSource _localDataSource;
 
-  const AuthRepoImpl(this._remoteDataSource);
+  const AuthRepoImpl(this._remoteDataSource, this._localDataSource);
 
   @override
   ResultFuture<User> signIn(String email, String password) async {
     try {
       final user = await _remoteDataSource.signIn(email, password);
+      final token = user.id;
+      await _localDataSource.saveToken(token);
       return Right(user);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
+
+  @override
+  ResultFuture<bool> isLoggedIn() async {
+    try {
+      final token = await _localDataSource.getToken();
+      return Right(token != null);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));
     }
@@ -57,6 +71,7 @@ class AuthRepoImpl implements AuthRepo {
   ResultVoid deleteUser(String id) async {
     try {
       await _remoteDataSource.deleteUser(id);
+      await _localDataSource.clearToken();
       return const Right(null);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));
@@ -67,6 +82,7 @@ class AuthRepoImpl implements AuthRepo {
   ResultVoid signOut() async {
     try {
       await _remoteDataSource.signOut();
+      await _localDataSource.clearToken();
       return const Right(null);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));

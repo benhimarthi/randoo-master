@@ -7,6 +7,7 @@ abstract class ServiceRepository {
   ResultFuture<List<Service>> getServices();
   ResultFuture<void> updateService(Service service);
   ResultFuture<void> deleteService(String serviceId);
+  ResultFuture<Service> getServiceById(String serviceId);
   ResultFuture<void> addReview(Review review);
   ResultFuture<List<Review>> getReviews(String serviceId);
   ResultFuture<List<Service>> getReviewedServices(String userId);

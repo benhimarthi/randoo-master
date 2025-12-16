@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:myapp/core/usecases/usecase.dart';
 import 'package:myapp/features/auth/domain/entities/user.dart';
 import 'package:myapp/features/auth/domain/usecases/delete_user.dart';
 import 'package:myapp/features/auth/domain/usecases/forgot_password.dart';
+import 'package:myapp/features/auth/domain/usecases/is_logged_in.dart';
 import 'package:myapp/features/auth/domain/usecases/register.dart';
 import 'package:myapp/features/auth/domain/usecases/sign_in.dart';
 import 'package:myapp/features/auth/domain/usecases/sign_out.dart';
@@ -17,6 +17,7 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignIn _signIn;
   final Register _register;
+  final IsLoggedIn _isLoggedIn;
   final ForgotPassword _forgotPassword;
   final UpdateUser _updateUser;
   final DeleteUser _deleteUser;
@@ -25,19 +26,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required SignIn signIn,
     required Register register,
+    required IsLoggedIn isLoggedIn,
     required ForgotPassword forgotPassword,
     required UpdateUser updateUser,
     required DeleteUser deleteUser,
     required SignOut signOut,
-  })  : _signIn = signIn,
-        _register = register,
-        _forgotPassword = forgotPassword,
-        _updateUser = updateUser,
-        _deleteUser = deleteUser,
-        _signOut = signOut,
-        super(const AuthInitial()) {
+  }) : _signIn = signIn,
+       _register = register,
+       _isLoggedIn = isLoggedIn,
+       _forgotPassword = forgotPassword,
+       _updateUser = updateUser,
+       _deleteUser = deleteUser,
+       _signOut = signOut,
+       super(const AuthInitial()) {
     on<SignInEvent>(_signInHandler);
     on<RegisterEvent>(_registerHandler);
+    on<IsLoggedInEvent>(_isLoggedInHandler);
     on<ForgotPasswordEvent>(_forgotPasswordHandler);
     on<UpdateUserEvent>(_updateUserHandler);
     on<DeleteUserEvent>(_deleteUserHandler);
@@ -58,6 +62,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthError(failure.errorMessage)),
       (user) => emit(SignedIn(user)),
     );
+  }
+
+  Future<void> _isLoggedInHandler(
+    IsLoggedInEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    final result = await _isLoggedIn();
+
+    result.fold((failure) => emit(AuthError(failure.errorMessage)), (
+      isLoggedIn,
+    ) {
+      if (isLoggedIn) {
+        emit(const Authenticated());
+      } else {
+        emit(const Unauthenticated());
+      }
+    });
   }
 
   Future<void> _registerHandler(

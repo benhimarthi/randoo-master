@@ -91,4 +91,14 @@ class ServiceRepositoryImpl implements ServiceRepository {
       return Left(FirebaseFailure.fromException(e));
     }
   }
+
+  @override
+  ResultFuture<Service> getServiceById(String serviceId) async {
+    try {
+      final result = await _serviceRemoteDataSource.getServiceById(serviceId);
+      return right(result);
+    } on FirebaseExceptions catch (e) {
+      return Left(FirebaseFailure.fromException(e));
+    }
+  }
 }

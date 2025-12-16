@@ -24,6 +24,15 @@ class ServicesLoaded extends ServiceState {
   List<Object> get props => [services];
 }
 
+class ServiceLoaded extends ServiceState {
+  final Service service;
+
+  const ServiceLoaded(this.service);
+
+  @override
+  List<Object> get props => [service];
+}
+
 class UpdatingService extends ServiceState {}
 
 class ServiceUpdated extends ServiceState {}
