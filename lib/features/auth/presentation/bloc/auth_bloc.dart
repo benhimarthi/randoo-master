@@ -75,8 +75,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold((failure) => emit(AuthError(failure.errorMessage)), (
       isLoggedIn,
     ) {
-      if (isLoggedIn) {
-        emit(const Authenticated());
+      if (isLoggedIn != null) {
+        emit(Authenticated(isLoggedIn));
       } else {
         emit(const Unauthenticated());
       }

@@ -6,7 +6,6 @@ import 'package:myapp/features/auth/presentation/views/register_regular_user_scr
 import 'package:myapp/features/auth/presentation/views/reset_password_page.dart';
 import 'package:myapp/features/home/presentation/views/home_screen.dart';
 import 'package:myapp/features/service/presentation/views/services_screen.dart';
-import 'package:provider/provider.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

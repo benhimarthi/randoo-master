@@ -28,10 +28,14 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  ResultFuture<bool> isLoggedIn() async {
+  ResultFuture<User?> isLoggedIn() async {
     try {
       final token = await _localDataSource.getToken();
-      return Right(token != null);
+      if (token != null) {
+        final user = await _remoteDataSource.getUserById(token);
+        return Right(user);
+      }
+      return Right(null);
     } on FirebaseExceptions catch (e) {
       return Left(FirebaseFailure.fromException(e));
     }

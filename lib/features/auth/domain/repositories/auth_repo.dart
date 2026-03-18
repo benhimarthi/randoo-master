@@ -6,7 +6,7 @@ import '../usecases/update_user.dart';
 abstract class AuthRepo {
   const AuthRepo();
   ResultFuture<User> signIn(String email, String password);
-  ResultFuture<bool> isLoggedIn();
+  ResultFuture<User?> isLoggedIn();
   ResultFuture<User> register(
     String name,
     String email,

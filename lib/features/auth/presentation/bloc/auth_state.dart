@@ -25,7 +25,8 @@ class SignedIn extends AuthState {
 }
 
 class Authenticated extends AuthState {
-  const Authenticated();
+  final User user;
+  const Authenticated(this.user);
 }
 
 class Unauthenticated extends AuthState {

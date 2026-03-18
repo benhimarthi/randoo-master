@@ -13,6 +13,8 @@ abstract class AuthRemoteDataSource {
     String userType,
   );
 
+  Future<UserModel> getUserById(String id);
+
   Future<void> forgotPassword(String email);
 
   Future<UserModel> updateUser(UpdateUserParams params);

@@ -87,14 +87,6 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(30),
-              /*boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.shadow,
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],*/
             ),
             child: TextField(
               controller: _searchController,

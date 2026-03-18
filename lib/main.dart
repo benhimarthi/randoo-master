@@ -4,7 +4,6 @@ import 'package:myapp/core/services/notification.service.dart';
 import 'package:myapp/core/services/service_locator.dart' as di;
 import 'package:myapp/core/theme/theme.dart';
 import 'package:myapp/core/theme/theme_provider.dart';
-import 'package:myapp/features/auth/data/datasources/auth_local_data_source.dart';
 import 'package:myapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:myapp/features/auth/presentation/providers/user_provider.dart';
 import 'package:myapp/features/auth/presentation/views/register_regular_user_screen.dart';
@@ -30,8 +29,6 @@ import 'package:myapp/features/serviceMetadata/presentation/pages/service_metada
 import 'package:myapp/features/home/presentation/views/privacy_policy_screen.dart';
 import 'package:myapp/firebase_options.dart';
 import 'package:provider/provider.dart';
-
-import 'core/services/service_locator.dart';
 import 'features/notifications/presentation/notification.listenner.dart';
 
 Future<void> main() async {
@@ -69,26 +66,28 @@ class MyApp extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
-            home: const HomeScreen(),
+            home: BlocConsumer<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (state is Authenticated) {
+                  context.read<UserProvider>().setUser(state.user);
+                }
+              },
+              builder: (context, state) {
+                if (state is Authenticated) {
+                  const HomeScreen();
+                } else {
+                  return SignInScreen();
+                }
+                return const HomeScreen();
+              },
+            ),
             navigatorKey: navigatorKey,
             routes: {"/service": (context) => ServicesScreen()},
             onGenerateRoute: (settings) {
               switch (settings.name) {
                 case '/home':
-                  return MaterialPageRoute(
-                    builder: (_) {
-                      return BlocConsumer<AuthBloc, AuthState>(
-                        listener: (context, state) {},
-                        builder: (context, state) {
-                          return state is Authenticated || state is SignedIn
-                              ? const HomeScreen()
-                              : const SignInScreen();
-                        },
-                      );
-                    },
-                  );
+                  return MaterialPageRoute(builder: (_) => const HomeScreen());
                 case "/notifications_view":
-                  var t = sl<AuthLocalDataSource>().getToken();
                   final notif = NotificationDataService(
                     context.read<UserProvider>().user!.id,
                   );

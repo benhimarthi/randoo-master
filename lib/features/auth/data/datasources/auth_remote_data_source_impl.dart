@@ -50,6 +50,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<UserModel> getUserById(String id) async {
+    try {
+      final doc = await _firestore.collection('users').doc(id).get();
+      if (!doc.exists) {
+        throw const FirebaseExceptions(
+          message: 'User not found',
+          statusCode: 404,
+        );
+      }
+      return UserModel.fromMap(doc.data()!);
+    } on FirebaseAuthException catch (e) {
+      throw FirebaseExceptions(
+        message: e.message ?? 'An error occurred',
+        statusCode: 500,
+      );
+    } on FirebaseExceptions {
+      rethrow;
+    } catch (e) {
+      throw FirebaseExceptions(message: e.toString(), statusCode: 500);
+    }
+  }
+
+  @override
   Future<UserModel> register(
     String name,
     String email,
